@@ -1,3 +1,6 @@
-import SceneManager from './bucket.js'
+import SceneManager from './SceneManager.js'
+import { SceneBoot } from './Scenes.js'
 
-SceneManager.run();
+window.onload = () => {
+	SceneManager.run(SceneBoot);
+}
