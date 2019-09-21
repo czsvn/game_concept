@@ -137,7 +137,7 @@ class SceneBoot extends SceneBase {
 	    this.updateDocumentTitle();
 	    console.info('start');
 
-	    SceneManager.goto(SceneTitle);
+	    SceneManager.goto(SceneGame1);
 
 
 	}
@@ -183,6 +183,158 @@ class SceneTitle extends SceneBase {
 	isBusy () {
 		return this._commandWindow.isClosing() || super.isBusy.call(this);
 	}
+}
+
+class SceneGame1 extends SceneBase {
+	constructor() {
+		super();
+		this._app = null;
+		this.cat = null;
+		this.state = null;
+	}
+
+	create () {
+		super.create.call(this)
+		this.createBackground();
+		// this.createForeground();
+	}
+
+	start () {
+		super.start.call(this)
+	}
+
+	update () {
+		super.update.call(this)
+		if (this.cat) {
+			this.cat.x += this.cat.vx;
+			this.cat.y += this.cat.vy;
+		}
+	}
+
+	createBackground () {
+		console.info("sdf");
+		var that = this;
+		PIXI.loader
+		.add("./src/test.json")
+		.load( () => {
+			console.info("sdf1");
+			that.setup.call(that)
+		});
+	}
+
+	setup () {
+		this._app = new PIXI.Application({
+			width: 256,         // default: 800
+		    height: 256,        // default: 600
+		    antialias: true,    // default: false
+		    transparent: false, // default: false
+		    resolution: 1       // default: 1
+		});
+		window.document.body.appendChild(this._app.view);
+		this._app.renderer.backgroundColor = 0x061639;
+		this._app.renderer.autoResize = true;
+		this._app.renderer.resize(512, 512);
+		let texture = PIXI.utils.TextureCache["cat.jpg"];
+		this.cat = new PIXI.Sprite(texture);
+		this.cat.vx = 0;
+		this.cat.vy = 0;
+		this._app.stage.addChild(this.cat);
+		this.createForeground();
+	}
+
+	createForeground () {
+		let left = this.keyboard(37),
+		    up = this.keyboard(38),
+		    right = this.keyboard(39),
+		    down = this.keyboard(40);
+		let cat = this.cat;
+	    left.press = () => {
+	    	console.info("left");
+		    cat.vx = -5;
+		    cat.vy = 0;
+	    }
+	    left.release = () => {
+		    if (!right.isDown && cat.vy === 0) {
+		        cat.vx = 0;
+		    }
+	    }
+
+	    //Up
+	    up.press = () => {
+		    cat.vy = -5;
+		    cat.vx = 0;
+	    };
+	    up.release = () => {
+		    if (!down.isDown && cat.vx === 0) {
+		        cat.vy = 0;
+		    }
+	    };
+
+	    //Right
+	    right.press = () => {
+		    cat.vx = 5;
+		    cat.vy = 0;
+	    };
+	    right.release = () => {
+		    if (!left.isDown && cat.vy === 0) {
+		        cat.vx = 0;
+		    }
+	    };
+
+	    //Down
+	    down.press = () => {
+		    cat.vy = 5;
+		    cat.vx = 0;
+	    };
+	    down.release = () => {
+		    if (!up.isDown && cat.vx === 0) {
+		        cat.vy = 0;
+		    }
+	    };
+	}
+
+	keyboard (keyCode) {
+		let key = {};
+	    key.code = keyCode;
+	    key.isDown = false;
+	    key.isUp = true;
+	    key.press = undefined;
+	    key.release = undefined;
+
+	    // The downHandler
+	    key.downHandler = event => {
+	        if (event.keyCode === key.code) {
+	            if (key.isUp && key.press) {
+	                key.press();
+	            }
+	            key.isDown = true;
+	            key.isUp = false;
+	        }
+	        event.preventDefault();
+	    };
+
+	    // The upHandler
+	    key.upHandler = event => {
+	        if (event.keyCode === key.code) {
+	            if (key.isDown && key.release) {
+	                key.release();
+	            }
+	            key.isDown = false;
+	            key.isUp = true;
+	        }
+	        event.preventDefault();
+	    };
+
+	    window.addEventListener(
+	        "keydown", key.downHandler.bind(key), false
+	    );
+
+	    window.addEventListener(
+	        "keyup", key.upHandler.bind(key), false
+	    );
+	    return key;
+	}
+
 }
 
 
